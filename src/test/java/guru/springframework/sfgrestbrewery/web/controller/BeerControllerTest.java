@@ -61,7 +61,6 @@ class BeerControllerTest {
     void getBeerByUPC() {
 
         given(beerService.getByUpc(any())).willReturn(validBeer);
-        "/api/v1/beer""/api/v1/beer""/api/v1/beer"
         webTestClient.get()
                 .uri(uriBuilder -> uriBuilder.path("/api/v1/beerUpc/{upc}").build(validBeer.getUpc()))
                 .accept(MediaType.APPLICATION_JSON)
