@@ -12,6 +12,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
 import java.util.List;
@@ -44,11 +45,11 @@ class BeerControllerTest {
 
     @Test
     void listBeers() {
-        List<BeerDto> beerList = Arrays.asList(validBeer);
+        List<BeerDto> beerList = List.of(validBeer);
 
         BeerPagedList beerPagedList = new BeerPagedList(beerList, PageRequest.of(1,1), beerList.size());
 
-        given(beerService.listBeers(any(), any(), any(), any())).willReturn(beerPagedList);
+        given(beerService.listBeers(any(), any(), any(), any())).willReturn(Mono.just(beerPagedList));
         webTestClient.get()
                 .uri(uriBuilder -> uriBuilder.path("/api/v1/beer").build())
                 .exchange()
@@ -60,21 +61,21 @@ class BeerControllerTest {
     @Test
     void getBeerByUPC() {
 
-        given(beerService.getByUpc(any())).willReturn(validBeer);
+        given(beerService.getByUpc(any())).willReturn(Mono.just(validBeer));
         webTestClient.get()
                 .uri(uriBuilder -> uriBuilder.path("/api/v1/beerUpc/{upc}").build(validBeer.getUpc()))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(BeerDto.class)
-                .value(beerDto -> beerDto.getBeerName(), equalTo(validBeer.getBeerName()));
+                .value(BeerDto::getBeerName, equalTo(validBeer.getBeerName()));
     }
 
     @Test
     void getBeerById() {
 
-        UUID beerId = UUID.randomUUID();
-        given(beerService.getById(any(), any())).willReturn(validBeer);
+        Integer beerId = 1;
+        given(beerService.getById(any(), any())).willReturn(Mono.just(validBeer));
 
         webTestClient.get()
                 .uri(uriBuilder -> uriBuilder.path("/api/v1/beer/{id}").build(beerId))
@@ -82,6 +83,6 @@ class BeerControllerTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(BeerDto.class)
-                .value(beerDto -> beerDto.getBeerName(), equalTo(validBeer.getBeerName()));
+                .value(BeerDto::getBeerName, equalTo(validBeer.getBeerName()));
     }
 }
